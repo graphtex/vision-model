@@ -2,13 +2,13 @@
 device='cuda'
 batch_size = 8
 start_epoch = 1
-epochs = 10
+epochs = 20
 logdir='logs/trial1'
 
 [optim]
-lr=1e-5
+lr=1e-4
 lr_backbone=1e-6
-lr_drop=3 # 200
+lr_drop=10 # 200
 weight_decay = 1e-4
 
 [loss]
@@ -23,6 +23,6 @@ giou = 2
 eos = 0.1
 
 [dataset]
-annot_file = 'graph_generation/small/train.json'
-img_dir = 'graph_generation/small/train'
-test_img_dir = 'graph_generation/test'
+annot_file = '../train.json'
+img_dir = 'train'
+test_img_dir = 'hand_labeled_test'

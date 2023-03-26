@@ -23,7 +23,7 @@ class GraphImageDataSet(Dataset):
 
         self.transform = T.Compose([
             T.ToTensor(),
-            T.Resize(200),
+            T.Resize(800),
             # T.Normalize([0.3146, 0.3174, 0.2144],[0.4644, 0.4655, 0.4104])
         ])
     
@@ -59,7 +59,7 @@ class GraphImageDataSet(Dataset):
 class GraphTestImages(Dataset):
     def __init__(self, img_dir) -> None:
         self.img_dir = img_dir
-        self.transform = T.Compose([T.ToTensor(),T.Resize(200)])
+        self.transform = T.Compose([T.ToTensor(),T.Resize(800)])
         self.images = os.listdir(self.img_dir)
 
     def __len__(self):

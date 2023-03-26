@@ -13,10 +13,15 @@ from torchvision.utils import draw_bounding_boxes
 from torchvision.utils import make_grid
 import torchvision.transforms as T
 
-def build(args, ):
+def build(args, model_file=None):
     device = args['training']['device']
 
     model = torch.hub.load('facebookresearch/detr:main', 'detr_resnet50', pretrained=True)
+    if model_file is not None:
+      print("LOADED MODEL")
+      state_dict = torch.load(model_file, map_location=torch.device(device))
+      model.load_state_dict(state_dict)
+    
     model.to(device)
 
     #TODO: replace 1 with 0?
@@ -118,14 +123,14 @@ def gen_test_segmentations(model, data_loader, device, thresh=0.7):
     return grid
 
 
-def run(args):
+def run(args, model_file=None):
     dataset = GraphImageDataSet(args['dataset']['annot_file'], args['dataset']['img_dir'])
     test_dataset = GraphTestImages(args['dataset']['test_img_dir'])
     train, val = random_split(dataset, [0.8,0.2], generator=torch.Generator().manual_seed(42))
     print(f"train len: {len(train)}")
     print(f"val len: {len(val)}")
 
-    model, criterion = build(args)
+    model, criterion = build(args, model_file)
 
     param_dicts = [
         {"params": [p for n, p in model.named_parameters() if "backbone" not in n and p.requires_grad]},
