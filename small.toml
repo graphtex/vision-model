@@ -1,6 +1,6 @@
 [training]
-device='cuda'
-batch_size = 8
+device='cpu'
+batch_size = 2
 start_epoch = 1
 epochs = 10
 logdir='logs/trial1'
@@ -26,3 +26,4 @@ eos = 0.1
 annot_file = 'graph_generation/small/train.json'
 img_dir = 'graph_generation/small/train'
 test_img_dir = 'graph_generation/test'
+

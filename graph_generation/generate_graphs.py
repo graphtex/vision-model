@@ -44,6 +44,8 @@ def gen_dataset(n, directory):
     output = {}
     i = 0
     while i < n:
+        if i % 50 == 0:
+            print(i)
         dir, nodes, f, color = next(dir_iter), next(n_iter), next(f_iter), next(color_iter)
         for p in np.linspace(0.05, 1.5 / nodes, 10):
             if nodes < 7 and p < 0.15:

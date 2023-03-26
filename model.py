@@ -1,11 +1,13 @@
 from tensorboardX import SummaryWriter
 import torch
+import sys
 from torch.utils.data import DataLoader, random_split
-from wheat_dataset import WheatImageDataSet, WheatTestImages
+from dataset import GraphImageDataSet, GraphTestImages
 from detr_model.models.detr import SetCriterion
 from detr_model.models.matcher import HungarianMatcher
 from detr_model.util.misc import collate_fn
 import utils
+import tomli
 from torchvision.ops import box_convert
 from torchvision.utils import draw_bounding_boxes
 from torchvision.utils import make_grid
@@ -57,8 +59,13 @@ def train_one_epoch(model, criterion, data_loader, optim, device, writer, step):
 
 @torch.no_grad()
 def evaluate(model, criterion, data_loader, device, writer, epoch):
+    loss_ce = 0
+    loss_bbox = 0
+    loss_tot = 0
+    loss_giou = 0
 
     step = 0
+    l = len(data_loader)
     for samples, targets in data_loader:
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -69,13 +76,21 @@ def evaluate(model, criterion, data_loader, device, writer, epoch):
 
         loss = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
 
-        for k, v in loss_dict.items():
-            writer.add_scalar(f'test/loss/{k}', v, epoch)
-        writer.add_scalar('test/loss/total', loss, epoch)
-
+        loss_ce += loss_dict['loss_ce'].item()
+        loss_bbox += loss_dict['loss_bbox'].item()
+        loss_giou += loss_dict['loss_giou'].item()
+        loss_tot += loss.item()
+        
         if step % 10 == 0:
             print(f"test step {step} - loss {loss.item()}")
         step += 1
+
+    writer.add_scalar(f'test/loss/ce', loss_ce / l, epoch) 
+    writer.add_scalar(f'test/loss/bbox', loss_ce / l, epoch) 
+    writer.add_scalar(f'test/loss/giou', loss_ce / l, epoch) 
+    writer.add_scalar('test/loss/total', loss / l, epoch)
+
+
     
 @torch.no_grad()
 def gen_test_segmentations(model, data_loader, device, thresh=0.7):
@@ -100,13 +115,12 @@ def gen_test_segmentations(model, data_loader, device, thresh=0.7):
         imgs.append(b)
 
     grid = make_grid(imgs, nrow=2)
-
     return grid
 
 
 def run(args):
-    dataset = WheatImageDataSet(args['dataset']['annot_file'], args['dataset']['img_dir'])
-    test_dataset = WheatTestImages(args['dataset']['test_img_dir'])
+    dataset = GraphImageDataSet(args['dataset']['annot_file'], args['dataset']['img_dir'])
+    test_dataset = GraphTestImages(args['dataset']['test_img_dir'])
     train, val = random_split(dataset, [0.8,0.2], generator=torch.Generator().manual_seed(42))
     print(f"train len: {len(train)}")
     print(f"val len: {len(val)}")
@@ -144,6 +158,13 @@ def run(args):
         
     
     return model
+
+
+if __name__ == "__main__":
+    with open(sys.argv[1], "rb") as f:
+        args = tomli.load(f)
+        print(args)
+    run(args)
 
 
 
