@@ -11,8 +11,9 @@ from PIL import Image
 import json
 
 class GraphImageDataSet(Dataset):
-    def __init__(self, annotations_file, img_dir):
+    def __init__(self, annotations_file, img_dir, filter_nodes = False):
         self.img_dir = img_dir
+        self.filter_nodes = filter_nodes
 
         with open(annotations_file, 'r') as f:
             annotations = json.load(f)
@@ -54,6 +55,16 @@ class GraphImageDataSet(Dataset):
         # labels = torch.ones(len(bboxes), dtype=torch.long)
         labels = torch.Tensor(self.annotations[img_id]['labels']).to(torch.int64)
         boxes = torch.Tensor(self.annotations[img_id]['boxes'])
+
+        valid_labels = labels > 35
+        labels = labels[valid_labels]
+        boxes = boxes[valid_labels]
+
+        if self.filter_nodes:
+            valid_labels = labels != 36
+            labels = labels[valid_labels]
+            boxes = boxes[valid_labels]
+
         return image, {'labels': labels, 'boxes': boxes}
 
 class GraphTestImages(Dataset):
