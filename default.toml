@@ -1,0 +1,29 @@
+[training]
+device='cuda'
+batch_size = 8
+start_epoch = 1
+epochs = 10
+logdir='logs/trial1'
+
+[optim]
+lr=1e-5
+lr_backbone=1e-6
+lr_drop=3 # 200
+weight_decay = 1e-4
+
+[loss]
+
+[loss.matcher]
+set_cost_bbox = 5
+set_cost_giou = 2
+
+[loss.coef]
+bbox = 5
+giou = 2
+eos = 0.1
+
+[dataset]
+annot_file = '../global-wheat-detection/train.csv'
+img_dir = '../global-wheat-detection/train'
+test_img_dir = '../global-wheat-detection/test'
+
