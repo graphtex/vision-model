@@ -23,7 +23,7 @@ giou = 2
 eos = 0.1
 
 [dataset]
-annot_file = 'graph_generation/small/train.json'
-img_dir = 'graph_generation/small/train'
-test_img_dir = 'graph_generation/test'
+annot_file = 'graph_generation/data/train.json'
+img_dir = 'graph_generation/data/train'
+test_img_dir = 'hand_labeled_test'
 

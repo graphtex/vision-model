@@ -35,7 +35,8 @@ all_labels = list(string.ascii_lowercase) + [chr(num) for num in range(48, 58)]
 
 
 def gen_dataset(n, directory):
-    os.mkdir(f'./{directory}/test')
+    os.makedirs(f'./{directory}/images', exist_ok=True)
+    os.makedirs(f'./{directory}/labels', exist_ok=True)
     dir_iter = cycle([True, False])
     n_iter = cycle([i + 2 for i in range(14)])
     color_iter = cycle(['#808080', '#696969', '#778899', '#708090', '#2f4f4f', '000000'])
@@ -52,12 +53,8 @@ def gen_dataset(n, directory):
                 continue
             # print(dir,nodes,f,p)
 
-            out = gen_graph(nodes, p, f, color, dir, False, i, f"./{directory}/train")
-            output[i] = out
+            gen_graph(nodes, p, f, color, dir, False, i, f"./{directory}/")
             i += 1
-
-    with open(f'./{directory}/train.json', 'w') as f:
-        json.dump(output, f)
 
 
 BACKGROUND = Image.open('./paper_background.jpg')
@@ -110,7 +107,7 @@ def gen_graph(n, p, f, c, directed=False, show=False, id=0, directory=''):
     plt.xlim([-2, 2])
     plt.ylim([-2, 2])
     plt.axis("off")
-    plt.savefig(f'{directory}/{id}.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{directory}/images/{id}.png', bbox_inches='tight', pad_inches=0)
     if not show:
         plt.close(fig)
 
@@ -213,6 +210,10 @@ def gen_graph(n, p, f, c, directed=False, show=False, id=0, directory=''):
         boxes.append([float(i) for i in out['boxes'][i]])
 
     out['boxes'] = boxes
+
+    with open(f'{directory}/labels/{id}.txt', 'w+') as f:
+        for i in range(len(out['labels'])):
+            f.write('%u %f %f %f %f\n' % (out['labels'][i], out['boxes'][i][0], out['boxes'][i][1], out['boxes'][i][2], out['boxes'][i][3]))
 
     return out
 

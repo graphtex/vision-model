@@ -12,6 +12,7 @@ from torchvision.ops import box_convert
 from torchvision.utils import draw_bounding_boxes
 from torchvision.utils import make_grid
 import torchvision.transforms as T
+import math
 
 def build(args, model_file=None):
     device = args['training']['device']
@@ -102,6 +103,7 @@ def gen_test_segmentations(model, data_loader, device, thresh=0.7):
     imgs = []
     for image in data_loader:
         image = image.to(device)
+        import time
         outputs = model(image)
         ps = outputs['pred_logits'].softmax(-1)[0, :, :-1]
         print(f"Max p: {ps.max()}")
@@ -126,7 +128,7 @@ def gen_test_segmentations(model, data_loader, device, thresh=0.7):
 def run(args, model_file=None):
     dataset = GraphImageDataSet(args['dataset']['annot_file'], args['dataset']['img_dir'])
     test_dataset = GraphTestImages(args['dataset']['test_img_dir'])
-    train, val = random_split(dataset, [0.8,0.2], generator=torch.Generator().manual_seed(42))
+    train, val = random_split(dataset, [int(len(dataset) * 0.8), math.ceil(len(dataset) * 0.2)], generator=torch.Generator().manual_seed(42))
     print(f"train len: {len(train)}")
     print(f"val len: {len(val)}")
 
