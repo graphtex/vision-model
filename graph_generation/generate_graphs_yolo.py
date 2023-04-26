@@ -34,7 +34,7 @@ for i in range(97, 123):
 all_labels = list(string.ascii_lowercase) + [chr(num) for num in range(48, 58)]
 
 
-def gen_dataset(n, directory):
+def gen_dataset(start_i, n, directory):
     os.makedirs(f'./{directory}/images', exist_ok=True)
     os.makedirs(f'./{directory}/labels', exist_ok=True)
     dir_iter = cycle([True, False])
@@ -42,9 +42,11 @@ def gen_dataset(n, directory):
     color_iter = cycle(['#808080', '#696969', '#778899', '#708090', '#2f4f4f', '000000'])
     f_iter = cycle([5, 6, 7])
 
+    from pympler.tracker import SummaryTracker
+    tracker = SummaryTracker()
     output = {}
-    i = 0
-    while i < n:
+    i = start_i
+    while i < n + start_i:
         if i % 50 == 0:
             print(i)
         dir, nodes, f, color = next(dir_iter), next(n_iter), next(f_iter), next(color_iter)
@@ -55,6 +57,8 @@ def gen_dataset(n, directory):
 
             gen_graph(nodes, p, f, color, dir, False, i, f"./{directory}/")
             i += 1
+
+    tracker.print_diff()
 
 
 BACKGROUND = Image.open('./paper_background.jpg')
@@ -108,6 +112,7 @@ def gen_graph(n, p, f, c, directed=False, show=False, id=0, directory=''):
     plt.ylim([-2, 2])
     plt.axis("off")
     plt.savefig(f'{directory}/images/{id}.png', bbox_inches='tight', pad_inches=0)
+    plt.clf()
     if not show:
         plt.close(fig)
 
@@ -215,12 +220,10 @@ def gen_graph(n, p, f, c, directed=False, show=False, id=0, directory=''):
         for i in range(len(out['labels'])):
             f.write('%u %f %f %f %f\n' % (out['labels'][i], out['boxes'][i][0], out['boxes'][i][1], out['boxes'][i][2], out['boxes'][i][3]))
 
-    return out
-
 
 def main():
     """n is first arg, directory is second"""
-    gen_dataset(int(sys.argv[1]), sys.argv[2])
+    gen_dataset(int(sys.argv[1]), int(sys.argv[2]), sys.argv[3])
 
 
 if __name__ == "__main__":
